@@ -36,6 +36,7 @@ func MakeDummyfile(filepath string, totalSize int) {
 	//const totalCount  = 1000000
 	p := [][]byte{}
 	//p :=[100]RefSet{}
+
 	ff, err2 := os.Create(filepath)
 	check(err2)
 	x := bufio.NewWriter(ff)
@@ -71,7 +72,7 @@ func Downloadfile(url string, filename string) {
 func ComparePDNA(dat []byte,reportDNA []byte)  int {
 
 	for i := 1; i <= 100; i++ {
-		
+
 		for j := 1; j <= 144; j++ {
 			fmt.Print(dat[(i * 144)-j])
 
@@ -84,18 +85,20 @@ func ComparePDNA(dat []byte,reportDNA []byte)  int {
 	return 0
 }
 func main() {
-
-		MakeDummyfile("c:\\temp\\pdnadata100.bin",100)
-		MakeDummyfile("c:\\temp\\reportpdnadata1000.bin",1000)
-		MakeDummyfile("c:\\temp\\pdnadata10000.bin",10000)
-		MakeDummyfile("c:\\temp\\pdnadata100000.bin",100000)
-
-
-	Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", "c:\\temp\\filefromgoogle2.jpg")
-
-	dat, err := ioutil.ReadFile("c:\\temp\\pdnadata100.bin")
+	path:="/Volumes/3tb/godump/"
+	os.MkdirAll(path,777)
+/*
+		MakeDummyfile((path+"pdnadata100.bin"),100)
+		MakeDummyfile((path+"reportpdnadata1000.bin"),1000)
+		MakeDummyfile((path+"pdnadata10000.bin"),10000)
+		MakeDummyfile((path+"pdnadata100000.bin"),100000)
+		MakeDummyfile((path+"pdnadata10000000.bin"),10000000)
+*/
+	Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", path+"filefromgoogle2.jpg")
+	Downloadfile("http://172.20.2.171:8500/v1/agent/services", path+"consulservies.json")
+	dat, err := ioutil.ReadFile(path+"pdnadata100.bin")
 	check(err)
-	reportDNA, err := ioutil.ReadFile("c:\\temp\\reportpdnadata1000.bin")
+	reportDNA, err := ioutil.ReadFile(path+"reportpdnadata1000.bin")
 	check(err)
 
 	//fmt.Print(string(dat))
