@@ -17,6 +17,9 @@ import (
 	"fmt"
 	"net/http"
 	"io"
+	"goConsul"
+
+
 )
 
 func check(e error) {
@@ -95,7 +98,7 @@ func main() {
 		MakeDummyfile((path+"pdnadata10000000.bin"),10000000)
 */
 	Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", path+"filefromgoogle2.jpg")
-	Downloadfile("http://172.20.2.171:8500/v1/agent/services", path+"consulservies.json")
+	Downloadfile("http://172.20.2.171:8500/v1/catalog/service/filerepo", path+"consulservies.json")
 	dat, err := ioutil.ReadFile(path+"pdnadata100.bin")
 	check(err)
 	reportDNA, err := ioutil.ReadFile(path+"reportpdnadata1000.bin")
@@ -104,4 +107,7 @@ func main() {
 	//fmt.Print(string(dat))
 	//fmt.Print(len(dat))
 	ComparePDNA(dat, reportDNA)
+	 goConsul.Getconfile(path+"consulservies.json")
+
+
 }
