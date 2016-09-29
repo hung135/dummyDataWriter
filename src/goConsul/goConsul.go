@@ -1,56 +1,69 @@
 package goConsul
 
+import (
+	"io/ioutil"
+	"encoding/json"
 
-
-import ("io/ioutil"
- "encoding/json"
-
-	"fmt"
 )
 
 /*
-HungSYX:elastic:9200: {
-ID: "HungSYX:elastic:9200",
-Service: "elasticsearch-9200",
-Tags: null,
-Address: "",
-Port: 9200,
-EnableTagOverride: false,
-CreateIndex: 0,
-ModifyIndex: 0
-},
+  {
+    "Node": "HungSYX",
+    "Address": "172.20.2.171",
+    "ServiceID": "HungSYX:filerepo0:8080",
+    "ServiceName": "filerepo",
+    "ServiceTags": [
+      "MCD_REPO"
+    ],
+    "ServiceAddress": "",
+    "ServicePort": 32768,
+    "ServiceEnableTagOverride": false,
+    "CreateIndex": 49181,
+    "ModifyIndex": 53802
+  }
 */
 
 type Services struct {
-	services [] ConsulService
-
+	Node      string `json:"Node"`
+	ServiceID string `json:"ServiceID"`
+	ServiceTags    [] string `json:"Tags"`
+	Address string `json:"Address"`
+	ServicePort    int `json:"ServicePort"`
 }
 type ConsulService struct {
-	ID string `json:"ID"`
-	Service string `json:"Service"`
-	Tags [] string `json:"Tags"`
+	Node      string
+	ServiceID string
+	ServiceTags    [] string
+	Address string
+	ServicePort    int
+}/*
+type ConsulService struct {
+	Node      string `json:"Node"`
+	ServiceID string `json:"ServiceID"`
+	ServiceTags    [] string `json:"Tags"`
 	Address string `json:"Address"`
-	Port int `json:"Port"`
+	ServicePort    int `json:"ServicePort"`
+}*/
 
-
-}
 func check(e error) {
 	if e != nil {
 		panic(e)
 	}
 }
-func ReadConfig(file string) Services{
-	var dbconn Services
+func ReadConfig(file string) []Services {
+	var jsonData []Services
 
-	configdata,err := ioutil.ReadFile(file)
+	configdata, err := ioutil.ReadFile(file)
 	check(err)
-	json.Unmarshal(configdata,&dbconn)
-	return dbconn
+	//fmt.Print(configdata)
+	json.Unmarshal(configdata, &jsonData)
+	//fmt.Print(jsonData)
+	return jsonData
 
 }
 
-func GetConfile(filepath string) {
-	s:=ReadConfig(filepath)
-	fmt.Print(s)
+func GetConfile(filepath string) []Services{
+	s := ReadConfig(filepath)
+	return s
 
 }

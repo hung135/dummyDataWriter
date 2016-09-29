@@ -20,6 +20,9 @@ import (
 	"goConsul"
 
 	"runtime"
+
+	"time"
+	"log"
 )
 
 func check(e error) {
@@ -72,18 +75,48 @@ func Downloadfile(url string, filename string) {
 	check(err)
 
 }
+func pdnaCompare(ref_dna []byte, reporDNA []byte) bool {
+	//var maxTotal = 2000
+	var runnintTotal int
+	x :=  int(uint(ref_dna[1]) - uint(reporDNA[0]))
+	//fmt.Println(int(x),uint(ref_dna[1]) , uint(reporDNA[0]))
+	runnintTotal=(runnintTotal+x)
+	if (x > 200) {
+		return false
+	} else
+	{
+		return true
+	}
+}
 func ComparePDNA(dat []byte, reportDNA []byte) int {
+	var datlen int
+	var replen int
+	datlen = len(dat) / 144
+	replen = len(reportDNA) / 144
 
-	for i := 1; i <= 100; i++ {
-
+	fmt.Println(datlen, " Refset")
+	fmt.Println(replen, " report ")
+	t:=time.Now()
+	fmt.Println(t)
+	for i := 0; i < datlen; i++ {
+		startIdx := i * 144
+		ref_dna := dat[startIdx:startIdx + 144]
+		for j := 0; j < replen; j++ {
+			startIdx2 := j * 144
+			report_dna := reportDNA[startIdx2:startIdx2 + 144]
+			_ = pdnaCompare(ref_dna, report_dna)
+			//fmt.Print((result))
+		}
+		/*
 		for j := 1; j <= 144; j++ {
 			fmt.Print(dat[(i * 144) - j])
 
-		}
-		fmt.Println("")
+		}*/
+		//fmt.Println("")
 		//ComparePDNA(refDNA,reportDNA)
 	}
-
+	elapsed := time.Since(t)
+	log.Printf("Compare took %s", elapsed)
 	return 0
 }
 func main() {
@@ -98,23 +131,41 @@ func main() {
 
 	os.MkdirAll(path, 777)
 
-			MakeDummyfile((path+"pdnadata100.bin"),100)
-			MakeDummyfile((path+"reportpdnadata1000.bin"),1000)
-	/*		MakeDummyfile((path+"pdnadata10000.bin"),10000)
-			MakeDummyfile((path+"pdnadata100000.bin"),100000)
-			MakeDummyfile((path+"pdnadata10000000.bin"),10000000)
-	*/
-	//Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", path + "filefromgoogle2.jpg")
-	//Downloadfile("http://172.20.2.171:8500/v1/catalog/service/filerepo", path + "consulservies.json")
-	dat, err := ioutil.ReadFile(path + "pdnadata100.bin")
+	MakeDummyfile((path + "pdnadata100.bin"), 100)
+	/*	MakeDummyfile((path + "reportpdnadata10000.bin"), 100000)
+				MakeDummyfile((path+"pdnadata10000.bin"),10000)
+				MakeDummyfile((path+"pdnadata100000.bin"),100000)
+				MakeDummyfile((path+"pdnadata1MIL.bin"),1000000)
+		*/
+	Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", path + "filefromgoogle2.jpg")
+		//Downloadfile("http://172.20.2.171:8500/v1/catalog/service/filerepo", path + "consulservies.json")
+	dat, err := ioutil.ReadFile(path + "pdnadata1MIL.bin")
 	check(err)
-	reportDNA, err := ioutil.ReadFile(path + "reportpdnadata1000.bin")
+	//reportDNA, err := ioutil.ReadFile(path + "reportpdnadata10000.bin")
+	reportDNA, err := ioutil.ReadFile(path + "pdnadata100.bin")
+
+
 	check(err)
 
 	//fmt.Print(string(dat))
 	//fmt.Print(len(dat))
+	x:=len(reportDNA)
+	fmt.Print(x)
+	s := make([]uint, x, x)
+	fmt.Println(s[0])
+	for i:=0;i<x;i++{
+		//fmt.Print(i)
+		s[i]=uint(reportDNA[i])
+	}
+	y:=len(dat)
+	r := make([]uint, y, y)
+	fmt.Println(s[0])
+	for i:=0;i<y;i++{
+		//fmt.Print(i)
+		r[i]=uint(dat[i])
+	}
 	ComparePDNA(dat, reportDNA)
-	services:=goConsul.GetConfile(path + "consulservies.json")
+	services := goConsul.GetConfile(path + "consulservies.json")
 	fmt.Print(services)
 
 }
