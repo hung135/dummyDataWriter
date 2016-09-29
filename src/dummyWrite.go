@@ -17,6 +17,9 @@ import (
 	"fmt"
 	"net/http"
 	"io"
+	"goConsul"
+
+	"runtime"
 )
 
 func check(e error) {
@@ -36,6 +39,7 @@ func MakeDummyfile(filepath string, totalSize int) {
 	//const totalCount  = 1000000
 	p := [][]byte{}
 	//p :=[100]RefSet{}
+
 	ff, err2 := os.Create(filepath)
 	check(err2)
 	x := bufio.NewWriter(ff)
@@ -68,37 +72,49 @@ func Downloadfile(url string, filename string) {
 	check(err)
 
 }
-func ComparePDNA(dat []byte,reportDNA []byte)  int {
+func ComparePDNA(dat []byte, reportDNA []byte) int {
 
 	for i := 1; i <= 100; i++ {
-		
+
 		for j := 1; j <= 144; j++ {
-			fmt.Print(dat[(i * 144)-j])
+			fmt.Print(dat[(i * 144) - j])
 
 		}
 		fmt.Println("")
 		//ComparePDNA(refDNA,reportDNA)
 	}
 
-
 	return 0
 }
 func main() {
+	var path string
 
-		MakeDummyfile("c:\\temp\\pdnadata100.bin",100)
-		MakeDummyfile("c:\\temp\\reportpdnadata1000.bin",1000)
-		MakeDummyfile("c:\\temp\\pdnadata10000.bin",10000)
-		MakeDummyfile("c:\\temp\\pdnadata100000.bin",100000)
+	if runtime.GOOS == "windows" {
 
+		path = "c:/temp/godump/"
+	} else {
+		path = "/Volumes/3tb/godump/"
+	}
 
-	Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", "c:\\temp\\filefromgoogle2.jpg")
+	os.MkdirAll(path, 777)
 
-	dat, err := ioutil.ReadFile("c:\\temp\\pdnadata100.bin")
+			MakeDummyfile((path+"pdnadata100.bin"),100)
+			MakeDummyfile((path+"reportpdnadata1000.bin"),1000)
+	/*		MakeDummyfile((path+"pdnadata10000.bin"),10000)
+			MakeDummyfile((path+"pdnadata100000.bin"),100000)
+			MakeDummyfile((path+"pdnadata10000000.bin"),10000000)
+	*/
+	//Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", path + "filefromgoogle2.jpg")
+	//Downloadfile("http://172.20.2.171:8500/v1/catalog/service/filerepo", path + "consulservies.json")
+	dat, err := ioutil.ReadFile(path + "pdnadata100.bin")
 	check(err)
-	reportDNA, err := ioutil.ReadFile("c:\\temp\\reportpdnadata1000.bin")
+	reportDNA, err := ioutil.ReadFile(path + "reportpdnadata1000.bin")
 	check(err)
 
 	//fmt.Print(string(dat))
 	//fmt.Print(len(dat))
 	ComparePDNA(dat, reportDNA)
+	services:=goConsul.GetConfile(path + "consulservies.json")
+	fmt.Print(services)
+
 }
