@@ -119,6 +119,15 @@ func ComparePDNA(dat []byte, reportDNA []byte) int {
 	log.Printf("Compare took %s", elapsed)
 	return 0
 }
+
+func MaxParallelism() int {
+	maxProcs := runtime.GOMAXPROCS(0)
+	numCPU := runtime.NumCPU()
+	if maxProcs < numCPU {
+		return maxProcs
+	}
+	return numCPU
+}
 func main() {
 	var path string
 
@@ -141,15 +150,15 @@ func main() {
 		//Downloadfile("http://172.20.2.171:8500/v1/catalog/service/filerepo", path + "consulservies.json")
 	dat, err := ioutil.ReadFile(path + "pdnadata1MIL.bin")
 	check(err)
-	//reportDNA, err := ioutil.ReadFile(path + "reportpdnadata10000.bin")
-	reportDNA, err := ioutil.ReadFile(path + "pdnadata100.bin")
+	reportDNA, err := ioutil.ReadFile(path + "reportpdnadata10000.bin")
+	//reportDNA, err := ioutil.ReadFile(path + "pdnadata100.bin")
 
 
 	check(err)
 
 	//fmt.Print(string(dat))
 	//fmt.Print(len(dat))
-	x:=len(reportDNA)
+	/*x:=len(reportDNA)
 	fmt.Print(x)
 	s := make([]uint, x, x)
 	fmt.Println(s[0])
@@ -159,12 +168,20 @@ func main() {
 	}
 	y:=len(dat)
 	r := make([]uint, y, y)
-	fmt.Println(s[0])
+	fmt.Println(y)
 	for i:=0;i<y;i++{
 		//fmt.Print(i)
 		r[i]=uint(dat[i])
+	}*/
+fmt.Println(MaxParallelism(),"Number CPU")
+	cpu:=MaxParallelism()-2
+	for i:=0;i<cpu-1;i++{
+		s:=dat[i:500000*144]
+		go ComparePDNA(s, reportDNA)
+		time.Sleep(1000 * time.Millisecond)
 	}
-	ComparePDNA(dat, reportDNA)
+	x:=dat[500000*144:]
+	ComparePDNA(x, reportDNA)
 	services := goConsul.GetConfile(path + "consulservies.json")
 	fmt.Print(services)
 
