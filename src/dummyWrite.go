@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"net/http"
 	"io"
-	"goConsul"
+	//"goConsul"
 
 	"runtime"
 
@@ -77,10 +77,13 @@ func Downloadfile(url string, filename string) {
 }
 func pdnaCompare(ref_dna []byte, reporDNA []byte) bool {
 	//var maxTotal = 2000
-	var runnintTotal int
-	x :=  int(uint(ref_dna[1]) - uint(reporDNA[0]))
-	//fmt.Println(int(x),uint(ref_dna[1]) , uint(reporDNA[0]))
-	runnintTotal=(runnintTotal+x)
+	//var runnintTotal uint16
+	x := int16((uint8(ref_dna[1]) - uint8(reporDNA[0])))
+
+	if ( uint(ref_dna[1]) < uint(reporDNA[0])) {
+		fmt.Println(int(uint(ref_dna[1]) - uint(reporDNA[0])), x, uint(ref_dna[1]), uint(reporDNA[0]))
+	}
+	//	runnintTotal=(runnintTotal+x)
 	if (x > 200) {
 		return false
 	} else
@@ -128,6 +131,11 @@ func MaxParallelism() int {
 	}
 	return numCPU
 }
+// Clears the bit at pos in n.
+func clearBit(n int, pos uint) int {
+	n &^= (1 << pos)
+	return n
+}
 func main() {
 	var path string
 
@@ -141,11 +149,15 @@ func main() {
 	os.MkdirAll(path, 777)
 
 	MakeDummyfile((path + "pdnadata100.bin"), 100)
-	/*	MakeDummyfile((path + "reportpdnadata10000.bin"), 100000)
+	MakeDummyfile((path + "reportpdnadata10000.bin"), 1000)
+	MakeDummyfile((path + "pdnadata1MIL.bin"), 1000)
+
+	/*
+		MakeDummyfile((path + "reportpdnadata10000.bin"), 100000)
 				MakeDummyfile((path+"pdnadata10000.bin"),10000)
 				MakeDummyfile((path+"pdnadata100000.bin"),100000)
 				MakeDummyfile((path+"pdnadata1MIL.bin"),1000000)
-		*/
+	*/
 	Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", path + "filefromgoogle2.jpg")
 		//Downloadfile("http://172.20.2.171:8500/v1/catalog/service/filerepo", path + "consulservies.json")
 	dat, err := ioutil.ReadFile(path + "pdnadata1MIL.bin")
@@ -175,14 +187,23 @@ func main() {
 	}*/
 fmt.Println(MaxParallelism(),"Number CPU")
 	cpu:=MaxParallelism()-2
+	chunk := int(len(dat) / cpu)
+	rslice := reportDNA[0:]
 	for i:=0;i<cpu-1;i++{
-		s:=dat[i:500000*144]
-		go ComparePDNA(s, reportDNA)
+
+		s := dat[i * chunk:chunk * i + chunk]
+		fmt.Println(i * chunk, "start-end", chunk * i + chunk)
+		//pass in slices don't pass arrays
+		go ComparePDNA(s, rslice)
 		time.Sleep(1000 * time.Millisecond)
 	}
-	x:=dat[500000*144:]
+	x := dat[(cpu - 1) * chunk:]
+	fmt.Println((cpu - 1) * chunk, "Last One", len(dat))
 	ComparePDNA(x, reportDNA)
-	services := goConsul.GetConfile(path + "consulservies.json")
-	fmt.Print(services)
+
+	time.Sleep(3000 * time.Millisecond)
+
+	//services := goConsul.GetConfile(path + "consulservies.json")
+	//fmt.Print(services)
 
 }
