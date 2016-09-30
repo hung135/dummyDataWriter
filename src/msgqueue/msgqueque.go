@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"flag"
 	//"pdnacompare"
+	"pdnacompare"
 )
 
 func failOnError(err error, msg string) {
@@ -135,7 +136,7 @@ func Consumer(amqpURI string, queuename string, msg string, dat []byte, reportDN
 		//log.Printf("got %s", d)
 		log.Printf("got %s", d.Body)
 		log.Print(" -->Call Logic next()")
-		//pdnacompare.DoPDNAWORK(dat,reportDNA)
+		pdnacompare.DoPDNAWORK(dat, reportDNA)
 		log.Print(" <--Send Results back")
 	}
 

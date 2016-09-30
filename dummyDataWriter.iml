@@ -8,6 +8,5 @@
     </content>
     <orderEntry type="jdk" jdkName="Go 1.7.1" jdkType="Go SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="GOPATH &lt;dummyDataWriter&gt;" level="project" />
   </component>
 </module>
