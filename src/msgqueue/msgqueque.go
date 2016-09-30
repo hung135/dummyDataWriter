@@ -5,6 +5,7 @@ import (
 	"github.com/streadway/amqp"
 	"fmt"
 	"flag"
+	//"pdnacompare"
 )
 
 func failOnError(err error, msg string) {
@@ -13,8 +14,9 @@ func failOnError(err error, msg string) {
 		panic(fmt.Sprintf("%s: %s", msg, err))
 	}
 }
-func Publish() {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+func CreateQueue(uri string, quename string) {
+	//conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(uri)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -23,7 +25,7 @@ func Publish() {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"pdna", // name
+		quename, // name
 		true, // durable
 		false, // delete when usused
 		false, // exclusive
@@ -45,7 +47,28 @@ func Publish() {
 	failOnError(err, "Failed to publish a message")
 
 }
-func Producer(amqpURI string, msg string) {
+func Producer(amqpURI string, queuename string, msg string) {
+
+	//conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial(amqpURI)
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	_, err = ch.QueueDeclare(
+		queuename, // name
+		true, // durable
+		false, // delete when usused
+		false, // exclusive
+		false, // no-wait
+		nil, // arguments
+	)
+	failOnError(err, "Failed to declare a queue")
+
+	//fmt.Println("",q)
 
 	connection, _ := amqp.Dial(amqpURI)
 
@@ -54,7 +77,7 @@ func Producer(amqpURI string, msg string) {
 	for i := 0; i < 10; i++ {
 		channel.Publish(
 			"", //exchange
-			"pdna", //routingKey
+			queuename, //routingKey
 			false,
 			false,
 			amqp.Publishing{
@@ -83,7 +106,8 @@ var (
 	consumerTag	= flag.String("consumer-tag", "simple-consumer", "AMQP consumer tag (should not be blank)")
 	wsPort		= flag.Int("ws-port", 23456, "WebSockets port to listen to")
 )
-func Consumer(amqpURI string, msg string)   {
+
+func Consumer(amqpURI string, queuename string, msg string, dat []byte, reportDNA []byte) {
 	c := &Consumerx{
 		conn:		nil,
 		channel:	nil,
@@ -95,9 +119,9 @@ func Consumer(amqpURI string, msg string)   {
 	c.channel, _ = c.conn.Channel()
 
 	deliveries, err := c.channel.Consume(
-		"pdna",	// name
+		queuename, // name
 		c.tag,	// consumerTag,
-		false,	// noAck
+		true, // noAck
 		false,	// exclusive
 		false,	// noLocal
 		false,	// noWait
@@ -106,9 +130,13 @@ func Consumer(amqpURI string, msg string)   {
 	if err != nil {
 		  fmt.Errorf("Queue Consume: %s", err)
 	}
-
+	fmt.Printf("Listening For Work")
 	for d := range deliveries {
+		//log.Printf("got %s", d)
 		log.Printf("got %s", d.Body)
+		log.Print(" -->Call Logic next()")
+		//pdnacompare.DoPDNAWORK(dat,reportDNA)
+		log.Print(" <--Send Results back")
 	}
 
 }
