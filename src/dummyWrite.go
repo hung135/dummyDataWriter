@@ -34,9 +34,11 @@ func main() {
 
 	os.MkdirAll(path, 777)
 
-	makedummyfile.MakeDummyfile((path + "pdnadata1MIL.bin"), 1000)
-	makedummyfile.MakeDummyfile((path + "reportpdnadata10000.bin"), 100000)
+	makedummyfile.MakeDummyfile((path + "pdnadata1MIL.bin"), 1000001)
+	makedummyfile.MakeDummyfile((path + "reportpdnadata10000.bin"), 20000)
+	/*
 	makedummyfile.Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", path + "filefromgoogle2.jpg")
+	*/
 	//Downloadfile("http://172.20.2.171:8500/v1/catalog/service/filerepo", path + "consulservies.json")
 	//randomin pdna file generator
 	dat, err := ioutil.ReadFile(path + "pdnadata1MIL.bin")
@@ -44,10 +46,15 @@ func main() {
 	reportDNA, err := ioutil.ReadFile(path + "reportpdnadata10000.bin")
 	makedummyfile.Check(err)
 
+
+	//creating slices which are pointers instead of passing in full array by value
+	refSet := dat[0:]
+	reportSet := reportDNA[0:]
+
 	//pdnacompare.DoPDNAWORK(dat,reportDNA)
 	//msgqueue.CreateQueue("amqp://guest:guest@172.20.2.209:5672/","PDNAQueue")
 	//msgqueue.Producer("amqp://guest:guest@172.20.2.209:5672/", "PDNAQueue", "Go Do Some Work!!!")
-	msgqueue.Consumer("amqp://guest:guest@172.20.2.209:5672/", "PDNAQueue", "Workerx", dat, reportDNA)
+	msgqueue.Consumer("amqp://guest:guest@172.20.2.209:5672/", "PDNAQueue", "Workerx", refSet, reportSet)
 
 	//services := goConsul.GetConfile(path + "consulservies.json")
 	//fmt.Print(services)

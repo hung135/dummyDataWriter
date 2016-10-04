@@ -7,6 +7,7 @@ import (
 	"flag"
 	//"pdnacompare"
 	"pdnacompare"
+	"time"
 )
 
 func failOnError(err error, msg string) {
@@ -112,7 +113,7 @@ func Consumer(amqpURI string, queuename string, msg string, dat []byte, reportDN
 	c := &Consumerx{
 		conn:		nil,
 		channel:	nil,
-		tag:		"",
+		tag:                "PDNAWorker", //tag to go inside quemanager
 		done:		make(chan error),
 	}
 	c.conn, _ = amqp.Dial(amqpURI)
@@ -122,7 +123,7 @@ func Consumer(amqpURI string, queuename string, msg string, dat []byte, reportDN
 	deliveries, err := c.channel.Consume(
 		queuename, // name
 		c.tag,	// consumerTag,
-		true, // noAck
+		false, // noAck
 		false,	// exclusive
 		false,	// noLocal
 		false,	// noWait
@@ -132,12 +133,25 @@ func Consumer(amqpURI string, queuename string, msg string, dat []byte, reportDN
 		  fmt.Errorf("Queue Consume: %s", err)
 	}
 	fmt.Printf("Listening For Work")
+	var i int
+
+
 	for d := range deliveries {
 		//log.Printf("got %s", d)
-		log.Printf("got %s", d.Body)
-		log.Print(" -->Call Logic next()")
+		//log.Printf("got %s", d.Body)
+		// log.Print(" -->Call Logic next()")
+		t := time.Now()
+
 		pdnacompare.DoPDNAWORK(dat, reportDNA)
-		log.Print(" <--Send Results back")
+		elapsed := time.Since(t)
+		d.Ack(false) // i'm done with the work
+		i++
+		fmt.Println("Work Done, Total Time: ", elapsed)
+		//fmt.Println("Listening for Work \n",d)
+		//fmt.Println("Listening for Work \n",d.DeliveryTag)
+
+
+		// log.Print(" <--Send Results back")
 	}
 
 }
