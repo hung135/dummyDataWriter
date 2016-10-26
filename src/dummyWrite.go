@@ -34,8 +34,8 @@ func main() {
 
 	os.MkdirAll(path, 777)
 
-	makedummyfile.MakeDummyfile((path + "pdnadata1MIL.bin"), 1000001)
-	makedummyfile.MakeDummyfile((path + "reportpdnadata10000.bin"), 20000)
+	makedummyfile.MakeDummyfile((path + "pdnadata1MIL.bin"), 1000)
+	makedummyfile.MakeDummyfile((path + "reportpdnadata10000.bin"), 1000)
 	/*
 	makedummyfile.Downloadfile("https://upload.wikimedia.org/wikipedia/commons/d/db/Patern_test.jpg", path + "filefromgoogle2.jpg")
 	*/
@@ -54,7 +54,7 @@ func main() {
 	//pdnacompare.DoPDNAWORK(dat,reportDNA)
 	//msgqueue.CreateQueue("amqp://guest:guest@172.20.2.209:5672/","PDNAQueue")
 	//msgqueue.Producer("amqp://guest:guest@172.20.2.209:5672/", "PDNAQueue", "Go Do Some Work!!!")
-	msgqueue.Consumer("amqp://guest:guest@172.20.2.209:5672/", "PDNAQueue", "Workerx", refSet, reportSet)
+	msgqueue.Consumer("amqp://guest:guest@172.20.2.196:5672/", "PDNAQueue", "Workerx", refSet, reportSet)
 
 	//services := goConsul.GetConfile(path + "consulservies.json")
 	//fmt.Print(services)
